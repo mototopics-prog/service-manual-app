@@ -17,7 +17,6 @@
 <!-- ===== 重要情報カード ===== -->
 <div class="info-cards">
 
-  <!-- タイヤ空気圧 -->
   <div class="info-card card-blue">
     <div class="info-card-icon">🏍️</div>
     <div class="info-card-body">
@@ -26,58 +25,51 @@
         <span class="psi-label">F</span><span class="psi-val">{{ bike.tire_pressure.front }} {{ bike.tire_pressure.unit }}</span>
         <span class="psi-label">R</span><span class="psi-val">{{ bike.tire_pressure.rear }} {{ bike.tire_pressure.unit }}</span>
       </div>
-      {% if bike.tire_pressure.note %}
-      <div class="info-card-note">{{ bike.tire_pressure.note }}</div>
-      {% endif %}
+      {% if bike.tire_pressure.note %}<div class="info-card-note">{{ bike.tire_pressure.note }}</div>{% endif %}
     </div>
   </div>
 
-  <!-- エンジンオイル -->
   <div class="info-card card-red">
     <div class="info-card-icon">🛢️</div>
     <div class="info-card-body">
       <div class="info-card-title">エンジンオイル</div>
-      <div class="info-card-values">
-        <span class="oil-type">{{ bike.oil.type }}</span>
-      </div>
-      <div class="info-card-sub">
-        フィルター交換時：{{ bike.oil.capacity_with_filter }} ／
-        オイルのみ：{{ bike.oil.capacity_without_filter }}
-      </div>
-      {% if bike.oil.note %}
-      <div class="info-card-note">{{ bike.oil.note }}</div>
-      {% endif %}
+      <div class="info-card-values"><span class="oil-type">{{ bike.oil.type }}</span></div>
+      <div class="info-card-sub">フィルター交換時：{{ bike.oil.capacity_with_filter }} ／ オイルのみ：{{ bike.oil.capacity_without_filter }}</div>
+      {% if bike.oil.note %}<div class="info-card-note">{{ bike.oil.note }}</div>{% endif %}
     </div>
   </div>
 
-  <!-- ブレーキフルード -->
   <div class="info-card card-amber">
     <div class="info-card-icon">💧</div>
     <div class="info-card-body">
       <div class="info-card-title">ブレーキフルード</div>
-      <div class="info-card-values">
-        <span class="oil-type">{{ bike.brake_fluid }}</span>
-      </div>
+      <div class="info-card-values"><span class="oil-type">{{ bike.brake_fluid }}</span></div>
     </div>
   </div>
 
-  <!-- スパークプラグ -->
   <div class="info-card card-green">
     <div class="info-card-icon">⚡</div>
     <div class="info-card-body">
       <div class="info-card-title">スパークプラグ</div>
-      <div class="info-card-values">
-        <span class="oil-type">{{ bike.spark_plug }}</span>
-      </div>
+      <div class="info-card-values"><span class="oil-type">{{ bike.spark_plug }}</span></div>
     </div>
   </div>
 
-</div><!-- /.info-cards -->
+</div>
 
-<!-- ===== セクション凡例 ===== -->
+<!-- ===== お気に入りセクション ===== -->
+<div class="fav-section" id="favSection" style="display:none">
+  <div class="fav-header">
+    <h2 class="fav-title">★ お気に入り項目</h2>
+    <button class="fav-clear-btn" onclick="clearAllFavs()">すべて解除</button>
+  </div>
+  <div class="fav-grid" id="favGrid"></div>
+</div>
+
+<!-- ===== セクション凡例（アンカーリンク） ===== -->
 <div class="legend">
   {% for section in bike.sections %}
-  <span class="legend-item" style="background:{{ section.color }}">{{ section.name }}</span>
+  <a href="#section-{{ section.id }}" class="legend-item" style="background:{{ section.color }}">{{ section.name }}</a>
   {% endfor %}
 </div>
 
@@ -90,6 +82,7 @@
       <table class="torque-table">
         <thead>
           <tr>
+            <th class="col-fav"></th>
             <th class="col-name">締め付け箇所 / 部品</th>
             <th class="col-spec">規格</th>
             <th class="col-torque">トルク</th>
@@ -98,14 +91,25 @@
         </thead>
         <tbody>
           {% for item in section.parts %}
-          <tr class="{% if loop.odd %}row-odd{% else %}row-even{% endif %}">
+          <tr class="{% if loop.odd %}row-odd{% else %}row-even{% endif %}"
+              data-key="{{ section.id }}-{{ loop.index0 }}"
+              data-section-id="{{ section.id }}"
+              data-section-name="{{ section.name }}"
+              data-section-color="{{ section.color }}"
+              data-name="{{ item.name }}"
+              data-spec="{{ item.spec or '' }}"
+              data-torque="{{ item.torque }}"
+              data-unit="{{ item.unit }}"
+              data-note="{{ item.note or '' }}">
+            <td class="col-fav">
+              <button class="fav-btn" onclick="toggleFav(this)" title="お気に入り登録">☆</button>
+            </td>
             <td class="col-name">{{ item.name }}</td>
             <td class="col-spec mono">{{ item.spec or '—' }}</td>
             <td class="col-torque">
               {% if item.torque != '—' %}
               <span class="torque-val" style="border-color:{{ section.color }}">
-                {{ item.torque }}
-                <span class="torque-unit">{{ item.unit }}</span>
+                {{ item.torque }}<span class="torque-unit">{{ item.unit }}</span>
               </span>
               {% else %}
               <span class="torque-na">—</span>
@@ -121,7 +125,6 @@
   {% endfor %}
 </div>
 
-<!-- ===== その他情報 ===== -->
 {% if bike.obd2_note %}
 <div class="extra-info">
   <h3>📟 OBD2 / 診断</h3>
@@ -129,12 +132,114 @@
 </div>
 {% endif %}
 
-<!-- 印刷用フッター -->
 <div class="print-footer-note">
   {{ bike.maker }} {{ bike.model }} {{ bike.year }}年式 整備早見表 ／ 印刷日：<span id="pdate"></span>
 </div>
 
 <script>
-document.getElementById('pdate').textContent = new Date().toLocaleDateString('ja-JP');
+/* ---- 定数 ---- */
+const BIKE_ID = '{{ bike.id }}';
+const FAV_KEY = 'fav_' + BIKE_ID;
+
+/* ---- localStorage ヘルパー ---- */
+function getFavs() {
+  try { return JSON.parse(localStorage.getItem(FAV_KEY) || '[]'); } catch { return []; }
+}
+function saveFavs(favs) {
+  localStorage.setItem(FAV_KEY, JSON.stringify(favs));
+}
+
+/* ---- お気に入り追加/解除 ---- */
+function toggleFav(btn) {
+  const row = btn.closest('tr');
+  const key = row.dataset.key;
+  let favs = getFavs();
+  const idx = favs.findIndex(f => f.key === key);
+  if (idx === -1) {
+    favs.push({
+      key,
+      sectionId:    row.dataset.sectionId,
+      sectionName:  row.dataset.sectionName,
+      sectionColor: row.dataset.sectionColor,
+      name:   row.dataset.name,
+      spec:   row.dataset.spec,
+      torque: row.dataset.torque,
+      unit:   row.dataset.unit,
+      note:   row.dataset.note,
+    });
+  } else {
+    favs.splice(idx, 1);
+  }
+  saveFavs(favs);
+  renderFavs();
+  syncBtns();
+}
+
+/* ---- すべて解除 ---- */
+function clearAllFavs() {
+  saveFavs([]);
+  renderFavs();
+  syncBtns();
+}
+
+/* ---- お気に入りセクション描画 ---- */
+function renderFavs() {
+  const favs = getFavs();
+  const section = document.getElementById('favSection');
+  const grid    = document.getElementById('favGrid');
+  if (favs.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = '';
+  grid.innerHTML = favs.map(f => `
+    <div class="fav-card" style="border-left-color:${f.sectionColor}">
+      <div class="fav-card-top">
+        <span class="fav-badge" style="background:${f.sectionColor}">${f.sectionName}</span>
+        ${f.spec ? `<span class="fav-spec">${f.spec}</span>` : ''}
+      </div>
+      <div class="fav-card-name">${f.name}</div>
+      <div class="fav-card-torque">
+        ${f.torque !== '—'
+          ? `<span class="torque-val" style="border-color:${f.sectionColor}">${f.torque}<span class="torque-unit">${f.unit}</span></span>`
+          : '<span class="torque-na">—</span>'}
+      </div>
+      ${f.note ? `<div class="fav-card-note">${f.note}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+/* ---- ★ボタン状態を localStorage と同期 ---- */
+function syncBtns() {
+  const favs = getFavs();
+  const keys = new Set(favs.map(f => f.key));
+  document.querySelectorAll('tr[data-key]').forEach(row => {
+    const btn = row.querySelector('.fav-btn');
+    if (keys.has(row.dataset.key)) {
+      btn.textContent = '★';
+      btn.classList.add('fav-active');
+    } else {
+      btn.textContent = '☆';
+      btn.classList.remove('fav-active');
+    }
+  });
+}
+
+/* ---- スムーズスクロール（sticky ヘッダー分オフセット） ---- */
+document.querySelectorAll('a[href^="#section-"]').forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(link.getAttribute('href'));
+    if (!target) return;
+    const headerH = document.querySelector('.site-header')?.offsetHeight || 56;
+    const offset  = 12; // 余白
+    const top = target.getBoundingClientRect().top + window.scrollY - headerH - offset;
+    window.scrollTo({ top, behavior: 'smooth' });
+  });
+});
+
+/* ---- 初期化 ---- */
+document.addEventListener('DOMContentLoaded', () => {
+  syncBtns();
+  renderFavs();
+  document.getElementById('pdate').textContent = new Date().toLocaleDateString('ja-JP');
+});
 </script>
 {% endblock %}
