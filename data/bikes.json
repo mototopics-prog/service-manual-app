@@ -1,0 +1,290 @@
+[
+  {
+    "id": "bmw-r-nine-t-2021",
+    "maker": "BMW",
+    "model": "R NINE T",
+    "year": "2021",
+    "displacement": 1170,
+    "displacement_label": "1170cc",
+    "tire_pressure": {
+      "front": "2.5",
+      "rear": "2.7～2.9",
+      "unit": "bar",
+      "note": "スポークホイール基準"
+    },
+    "oil": {
+      "type": "15W-50",
+      "capacity_with_filter": "4.0L",
+      "capacity_without_filter": "3.75L",
+      "note": "暖気状態で計測。窓をまっすぐに見て●の下がMAX"
+    },
+    "brake_fluid": "DOT4（前後共通）",
+    "spark_plug": "NGK MAR8B-JDS",
+    "bevel_gear_oil": {
+      "capacity": "180 ml",
+      "note": "交換時"
+    },
+    "obd2_note": "シート下タンク側の右側 OBD2カプラー。診断時の充電はタンク根本の＋とエンジンヘッドのアース",
+    "sections": [
+      {
+        "id": "front",
+        "name": "フロント",
+        "color": "#1a6fa8",
+        "parts": [
+          {
+            "name": "ハンドルクランプ メーター側",
+            "spec": "M10×80",
+            "torque": "38",
+            "unit": "N-m",
+            "note": ""
+          },
+          {
+            "name": "ハンドルクランプ シート側",
+            "spec": "M8×30",
+            "torque": "19",
+            "unit": "N-m",
+            "note": ""
+          },
+          {
+            "name": "ステアリングステム センターナット",
+            "spec": "",
+            "torque": "100",
+            "unit": "N-m",
+            "note": ""
+          },
+          {
+            "name": "トップ フォーククランプボルト",
+            "spec": "",
+            "torque": "19",
+            "unit": "N-m",
+            "note": ""
+          },
+          {
+            "name": "フォーク突き出し量",
+            "spec": "",
+            "torque": "5.5",
+            "unit": "mm",
+            "note": "トップキャップ蓋下とトップブリッジ基準 ±0.3mm"
+          },
+          {
+            "name": "ステム フォーククランプボルト",
+            "spec": "",
+            "torque": "19",
+            "unit": "N-m",
+            "note": "上下で締めて 上×3 F×2"
+          },
+          {
+            "name": "ステアリングダンパー取付ボルト",
+            "spec": "M8×45 / M8×30",
+            "torque": "19",
+            "unit": "N-m",
+            "note": ""
+          },
+          {
+            "name": "フロントアクスルシャフト",
+            "spec": "M20×1.5",
+            "torque": "50",
+            "unit": "N-m",
+            "note": ""
+          },
+          {
+            "name": "フロントアクスル ピンチボルト",
+            "spec": "M8×35",
+            "torque": "19",
+            "unit": "N-m",
+            "note": "左×3 右×3"
+          },
+          {
+            "name": "フロントキャリパー取付ボルト",
+            "spec": "",
+            "torque": "38",
+            "unit": "N-m",
+            "note": ""
+          },
+          {
+            "name": "キャリパー バンジョーボルト",
+            "spec": "",
+            "torque": "24",
+            "unit": "N-m",
+            "note": ""
+          },
+          {
+            "name": "ブレーキマスター バンジョーボルト",
+            "spec": "",
+            "torque": "30",
+            "unit": "N-m",
+            "note": "クラッチ側 24N-m"
+          },
+          {
+            "name": "フロントディスクボルト",
+            "spec": "M8×27 / 10.9",
+            "torque": "19",
+            "unit": "N-m",
+            "note": "新品ボルト使用。対角に締める。歪み0.1mmまで許容"
+          }
+        ]
+      },
+      {
+        "id": "rear",
+        "name": "リア",
+        "color": "#2e7d32",
+        "parts": [
+          {
+            "name": "リアホイールボルト",
+            "spec": "M10×53×1.25",
+            "torque": "60",
+            "unit": "N-m",
+            "note": "対角線に締める"
+          },
+          {
+            "name": "リアサスペンション 上",
+            "spec": "",
+            "torque": "56",
+            "unit": "N-m",
+            "note": "ネジロック推奨"
+          },
+          {
+            "name": "リアサスペンション 下",
+            "spec": "",
+            "torque": "56",
+            "unit": "N-m",
+            "note": "ネジロック推奨"
+          },
+          {
+            "name": "スプロケットナット",
+            "spec": "",
+            "torque": "—",
+            "unit": "",
+            "note": "サービスマニュアル参照"
+          },
+          {
+            "name": "リアディスクボルト",
+            "spec": "M8×15.5",
+            "torque": "30",
+            "unit": "N-m",
+            "note": "新品ボルト使用。1周目12N-mで締め、2周目30N-m。対角に。歪み0.1mm以内"
+          },
+          {
+            "name": "リアキャリパー取付ボルト",
+            "spec": "M8×25 / 10.9",
+            "torque": "28",
+            "unit": "N-m",
+            "note": ""
+          },
+          {
+            "name": "リアキャリパー バンジョーボルト",
+            "spec": "",
+            "torque": "21",
+            "unit": "N-m",
+            "note": ""
+          },
+          {
+            "name": "ベベルギア ドレンボルト",
+            "spec": "M12×1",
+            "torque": "20",
+            "unit": "N-m",
+            "note": ""
+          },
+          {
+            "name": "ベベルギア オイルフィラープラグ",
+            "spec": "M12×1.5",
+            "torque": "25",
+            "unit": "N-m",
+            "note": "ギアオイル容量 180ml"
+          }
+        ]
+      },
+      {
+        "id": "engine",
+        "name": "エンジン",
+        "color": "#b71c1c",
+        "parts": [
+          {
+            "name": "エンジンオイル ドレンボルト",
+            "spec": "",
+            "torque": "32",
+            "unit": "N-m",
+            "note": ""
+          },
+          {
+            "name": "オイルフィルター",
+            "spec": "",
+            "torque": "11",
+            "unit": "N-m",
+            "note": ""
+          },
+          {
+            "name": "スパークプラグ",
+            "spec": "NGK MAR8B-JDS",
+            "torque": "12",
+            "unit": "N-m",
+            "note": ""
+          },
+          {
+            "name": "マフラー フランジナット",
+            "spec": "",
+            "torque": "21",
+            "unit": "N-m",
+            "note": "サイレンサーバンド 28N-m。O2センサーはサービスマニュアル参照"
+          },
+          {
+            "name": "サイレンサーナット（シートレール）",
+            "spec": "",
+            "torque": "19",
+            "unit": "N-m",
+            "note": ""
+          },
+          {
+            "name": "サイドスタンド ピボットボルト",
+            "spec": "",
+            "torque": "41",
+            "unit": "N-m",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "id": "generator",
+        "name": "ジェネレーター",
+        "color": "#6a1b9a",
+        "parts": [
+          {
+            "name": "ジェネレーター取付ボルト",
+            "spec": "",
+            "torque": "9",
+            "unit": "N-m",
+            "note": ""
+          },
+          {
+            "name": "ジェネレーター配線取付ボルト",
+            "spec": "",
+            "torque": "4.5",
+            "unit": "N-m",
+            "note": ""
+          },
+          {
+            "name": "ジェネレーターカバーボルト",
+            "spec": "",
+            "torque": "3",
+            "unit": "N-m",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "id": "other",
+        "name": "その他",
+        "color": "#e65100",
+        "parts": [
+          {
+            "name": "ヘッドライト 光軸調整ボルト",
+            "spec": "",
+            "torque": "19",
+            "unit": "N-m",
+            "note": "光軸調整後にチェック"
+          }
+        ]
+      }
+    ]
+  }
+]

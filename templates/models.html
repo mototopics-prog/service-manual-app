@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{{ maker }} 車種選択 | バイク整備早見表{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+  <a href="/">TOP</a> › <span>{{ maker }}</span>
+</nav>
+
+<div class="page-hero">
+  <h1>{{ maker }}</h1>
+  <p class="subtitle">排気量で絞り込み、車種を選択してください</p>
+</div>
+
+<!-- 排気量フィルター -->
+<div class="filter-bar">
+  <span class="filter-label">排気量：</span>
+  <button class="filter-btn active" data-cc="all" onclick="filterBikes('all', this)">すべて</button>
+  {% for cc in displacements %}
+  <button class="filter-btn" data-cc="{{ cc }}" onclick="filterBikes('{{ cc }}', this)">{{ cc }}cc</button>
+  {% endfor %}
+</div>
+
+<!-- 車種カード -->
+<div class="model-grid" id="modelGrid">
+  {% for bike in bikes %}
+  <a href="{{ url_for('spec', bike_id=bike.id) }}"
+     class="model-card"
+     data-cc="{{ bike.displacement }}">
+    <div class="model-card-inner">
+      <div class="model-cc-badge">{{ bike.displacement_label }}</div>
+      <div class="model-name">{{ bike.model }}</div>
+      <div class="model-year">{{ bike.year }}年式</div>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+
+<script>
+function filterBikes(cc, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.model-card').forEach(card => {
+    card.style.display = (cc === 'all' || card.dataset.cc === cc) ? '' : 'none';
+  });
+}
+</script>
+{% endblock %}

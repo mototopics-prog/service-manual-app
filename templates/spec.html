@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}{{ bike.model }} {{ bike.year }}年式 | バイク整備早見表{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+  <a href="/">TOP</a> › <a href="{{ url_for('models', maker=bike.maker) }}">{{ bike.maker }}</a> › <span>{{ bike.model }}</span>
+</nav>
+
+<div class="spec-header">
+  <div class="spec-title-block">
+    <h1 class="spec-title">{{ bike.model }} <span class="spec-year">{{ bike.year }}年式</span></h1>
+    <p class="spec-meta">{{ bike.maker }} / {{ bike.displacement_label }}</p>
+  </div>
+  <button class="print-btn" onclick="window.print()">🖨️ 印刷</button>
+</div>
+
+<!-- ===== 重要情報カード ===== -->
+<div class="info-cards">
+
+  <!-- タイヤ空気圧 -->
+  <div class="info-card card-blue">
+    <div class="info-card-icon">🏍️</div>
+    <div class="info-card-body">
+      <div class="info-card-title">タイヤ空気圧</div>
+      <div class="info-card-values">
+        <span class="psi-label">F</span><span class="psi-val">{{ bike.tire_pressure.front }} {{ bike.tire_pressure.unit }}</span>
+        <span class="psi-label">R</span><span class="psi-val">{{ bike.tire_pressure.rear }} {{ bike.tire_pressure.unit }}</span>
+      </div>
+      {% if bike.tire_pressure.note %}
+      <div class="info-card-note">{{ bike.tire_pressure.note }}</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- エンジンオイル -->
+  <div class="info-card card-red">
+    <div class="info-card-icon">🛢️</div>
+    <div class="info-card-body">
+      <div class="info-card-title">エンジンオイル</div>
+      <div class="info-card-values">
+        <span class="oil-type">{{ bike.oil.type }}</span>
+      </div>
+      <div class="info-card-sub">
+        フィルター交換時：{{ bike.oil.capacity_with_filter }} ／
+        オイルのみ：{{ bike.oil.capacity_without_filter }}
+      </div>
+      {% if bike.oil.note %}
+      <div class="info-card-note">{{ bike.oil.note }}</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ブレーキフルード -->
+  <div class="info-card card-amber">
+    <div class="info-card-icon">💧</div>
+    <div class="info-card-body">
+      <div class="info-card-title">ブレーキフルード</div>
+      <div class="info-card-values">
+        <span class="oil-type">{{ bike.brake_fluid }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- スパークプラグ -->
+  <div class="info-card card-green">
+    <div class="info-card-icon">⚡</div>
+    <div class="info-card-body">
+      <div class="info-card-title">スパークプラグ</div>
+      <div class="info-card-values">
+        <span class="oil-type">{{ bike.spark_plug }}</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.info-cards -->
+
+<!-- ===== セクション凡例 ===== -->
+<div class="legend">
+  {% for section in bike.sections %}
+  <span class="legend-item" style="background:{{ section.color }}">{{ section.name }}</span>
+  {% endfor %}
+</div>
+
+<!-- ===== トルク表 ===== -->
+<div class="torque-wrapper">
+  {% for section in bike.sections %}
+  <section class="torque-section" id="section-{{ section.id }}">
+    <h2 class="section-heading" style="background:{{ section.color }}">{{ section.name }}</h2>
+    <div class="table-scroll">
+      <table class="torque-table">
+        <thead>
+          <tr>
+            <th class="col-name">締め付け箇所 / 部品</th>
+            <th class="col-spec">規格</th>
+            <th class="col-torque">トルク</th>
+            <th class="col-note">備考</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in section.parts %}
+          <tr class="{% if loop.odd %}row-odd{% else %}row-even{% endif %}">
+            <td class="col-name">{{ item.name }}</td>
+            <td class="col-spec mono">{{ item.spec or '—' }}</td>
+            <td class="col-torque">
+              {% if item.torque != '—' %}
+              <span class="torque-val" style="border-color:{{ section.color }}">
+                {{ item.torque }}
+                <span class="torque-unit">{{ item.unit }}</span>
+              </span>
+              {% else %}
+              <span class="torque-na">—</span>
+              {% endif %}
+            </td>
+            <td class="col-note note-text">{{ item.note or '' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% endfor %}
+</div>
+
+<!-- ===== その他情報 ===== -->
+{% if bike.obd2_note %}
+<div class="extra-info">
+  <h3>📟 OBD2 / 診断</h3>
+  <p>{{ bike.obd2_note }}</p>
+</div>
+{% endif %}
+
+<!-- 印刷用フッター -->
+<div class="print-footer-note">
+  {{ bike.maker }} {{ bike.model }} {{ bike.year }}年式 整備早見表 ／ 印刷日：<span id="pdate"></span>
+</div>
+
+<script>
+document.getElementById('pdate').textContent = new Date().toLocaleDateString('ja-JP');
+</script>
+{% endblock %}
