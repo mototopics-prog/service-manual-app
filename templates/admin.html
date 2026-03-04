@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+{% block title %}車種登録 | バイク整備早見表{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+  <a href="/">TOP</a> › <span>車種登録</span>
+</nav>
+
+<div class="page-hero">
+  <h1>新しい車種を登録</h1>
+  <p class="subtitle">bikes.json に新しい車種データを追加します</p>
+</div>
+
+<!-- 登録済み車種一覧 -->
+{% if bikes %}
+<div class="admin-existing">
+  <h2 class="admin-existing-title">登録済み車種</h2>
+  <div class="admin-existing-list">
+    {% for bike in bikes %}
+    <a href="{{ url_for('spec', bike_id=bike.id) }}" class="admin-existing-item">
+      <span class="existing-maker">{{ bike.maker }}</span>
+      <span class="existing-model">{{ bike.model }}</span>
+      <span class="existing-year">{{ bike.year }}年式</span>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- ===== フォーム ===== -->
+<form id="adminForm" novalidate>
+
+  <!-- 基本情報 -->
+  <div class="form-card">
+    <h2 class="form-card-title">📋 基本情報</h2>
+    <div class="form-grid-2">
+      <div class="field">
+        <label>メーカー <span class="req">*</span></label>
+        <input id="f-maker" type="text" placeholder="例: Honda, BMW, Ducati">
+      </div>
+      <div class="field">
+        <label>車種名 <span class="req">*</span></label>
+        <input id="f-model" type="text" placeholder="例: CB1000R, R NINE T">
+      </div>
+      <div class="field">
+        <label>年式 <span class="req">*</span></label>
+        <input id="f-year" type="text" placeholder="例: 2023">
+      </div>
+      <div class="field">
+        <label>排気量 (cc) <span class="req">*</span></label>
+        <input id="f-displacement" type="number" min="1" placeholder="例: 998">
+      </div>
+    </div>
+    <div class="field id-preview-wrap">
+      <label>生成されるID（自動）</label>
+      <code id="id-preview" class="id-preview">—</code>
+    </div>
+  </div>
+
+  <!-- クイックスペック -->
+  <div class="form-card">
+    <h2 class="form-card-title">⚡ クイックスペック</h2>
+
+    <h3 class="form-section-label">🏍️ タイヤ空気圧</h3>
+    <div class="form-grid-4">
+      <div class="field"><label>前 (F)</label><input id="f-tire-front" placeholder="例: 2.5"></div>
+      <div class="field"><label>後 (R)</label><input id="f-tire-rear" placeholder="例: 2.9"></div>
+      <div class="field"><label>単位</label><input id="f-tire-unit" value="bar"></div>
+      <div class="field"><label>備考</label><input id="f-tire-note" placeholder="例: スポークホイール基準"></div>
+    </div>
+
+    <h3 class="form-section-label">🛢️ エンジンオイル</h3>
+    <div class="form-grid-4">
+      <div class="field"><label>種類</label><input id="f-oil-type" placeholder="例: 15W-50"></div>
+      <div class="field"><label>フィルター交換時</label><input id="f-oil-cap-f" placeholder="例: 4.0L"></div>
+      <div class="field"><label>オイルのみ</label><input id="f-oil-cap-n" placeholder="例: 3.75L"></div>
+      <div class="field"><label>備考</label><input id="f-oil-note" placeholder="例: 暖機状態で計測"></div>
+    </div>
+
+    <div class="form-grid-2">
+      <div class="field">
+        <label>💧 ブレーキフルード</label>
+        <input id="f-brake" placeholder="例: DOT4（前後共通）">
+      </div>
+      <div class="field">
+        <label>⚡ スパークプラグ</label>
+        <input id="f-plug" placeholder="例: NGK MAR8B-JDS">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>📟 OBD2 / 診断メモ</label>
+      <textarea id="f-obd2" rows="2" placeholder="例: シート下タンク側の右側 OBD2カプラー..."></textarea>
+    </div>
+  </div>
+
+  <!-- トルクセクション -->
+  <div class="form-card">
+    <div class="form-card-title-bar">
+      <h2 class="form-card-title">🔩 トルクスペック セクション</h2>
+      <button type="button" class="btn-add-section" onclick="addSection()">＋ セクション追加</button>
+    </div>
+    <p class="form-hint">「フロント」「リア」「エンジン」など、部位ごとにセクションを追加して締め付けトルクを入力してください。</p>
+    <div id="sections-container"></div>
+  </div>
+
+  <!-- エラー表示 -->
+  <div class="form-error" id="form-error" style="display:none"></div>
+
+  <!-- 送信ボタン -->
+  <div class="form-actions">
+    <a href="/" class="btn-cancel">キャンセル</a>
+    <button type="button" class="btn-submit" onclick="submitForm()">💾 登録する</button>
+  </div>
+
+</form>
+
+<!-- ===== テンプレート: セクション ===== -->
+<template id="tpl-section">
+  <div class="section-block">
+    <div class="section-block-header">
+      <div class="section-block-header-left">
+        <select class="s-color-preset" onchange="applyPreset(this)">
+          <option value="#1a6fa8">🔵 フロント</option>
+          <option value="#2e7d32">🟢 リア</option>
+          <option value="#b71c1c">🔴 エンジン</option>
+          <option value="#6a1b9a">🟣 ジェネレーター</option>
+          <option value="#e65100">🟠 その他</option>
+          <option value="#00695c">🩵 サスペンション</option>
+          <option value="#1565c0">💙 電装</option>
+          <option value="#4e342e">🟤 フレーム</option>
+          <option value="custom">✏️ カスタム...</option>
+        </select>
+        <input type="color" class="s-color-input" value="#1a6fa8">
+        <input type="text" class="s-name" placeholder="セクション名 例: フロント">
+      </div>
+      <button type="button" class="btn-remove-section" onclick="removeSection(this)">× 削除</button>
+    </div>
+    <div class="parts-table-wrap">
+      <table class="parts-table">
+        <thead>
+          <tr>
+            <th class="pt-name">締め付け箇所 / 部品名</th>
+            <th class="pt-spec">規格</th>
+            <th class="pt-torque">トルク値</th>
+            <th class="pt-unit">単位</th>
+            <th class="pt-note">備考</th>
+            <th class="pt-del"></th>
+          </tr>
+        </thead>
+        <tbody class="parts-body"></tbody>
+      </table>
+    </div>
+    <button type="button" class="btn-add-part" onclick="addPart(this)">＋ 行追加</button>
+  </div>
+</template>
+
+<!-- ===== テンプレート: 部品行 ===== -->
+<template id="tpl-part">
+  <tr class="part-row">
+    <td><input class="p-name" type="text" placeholder="例: フロントアクスルシャフト"></td>
+    <td><input class="p-spec" type="text" placeholder="例: M20×1.5"></td>
+    <td><input class="p-torque" type="text" placeholder="例: 50"></td>
+    <td>
+      <select class="p-unit">
+        <option value="N-m">N-m</option>
+        <option value="mm">mm</option>
+        <option value="ml">ml</option>
+        <option value="kgf-m">kgf-m</option>
+        <option value="">—</option>
+      </select>
+    </td>
+    <td><input class="p-note" type="text" placeholder="備考・注意事項"></td>
+    <td><button type="button" class="btn-remove-part" onclick="removePart(this)" title="行削除">×</button></td>
+  </tr>
+</template>
+
+<script>
+/* ---- ID プレビュー ---- */
+function genId() {
+  const maker = v('f-maker').toLowerCase().replace(/\s+/g, '-');
+  const model = v('f-model').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const year  = v('f-year');
+  return [maker, model, year].filter(Boolean).join('-') || '—';
+}
+function v(id) { return document.getElementById(id).value.trim(); }
+['f-maker','f-model','f-year'].forEach(id =>
+  document.getElementById(id).addEventListener('input', () => {
+    document.getElementById('id-preview').textContent = genId();
+  })
+);
+
+/* ---- セクション追加 ---- */
+function addSection() {
+  const frag = document.getElementById('tpl-section').content.cloneNode(true);
+  const block = frag.querySelector('.section-block');
+  document.getElementById('sections-container').appendChild(frag);
+  // 色の初期適用
+  refreshBlockColor(block);
+  // color input change イベント
+  block.querySelector('.s-color-input').addEventListener('input', () => refreshBlockColor(block));
+  // 空行を1行追加
+  addPart(block.querySelector('.btn-add-part'));
+}
+
+/* ---- セクション削除 ---- */
+function removeSection(btn) { btn.closest('.section-block').remove(); }
+
+/* ---- カラープリセット ---- */
+function applyPreset(sel) {
+  const block = sel.closest('.section-block');
+  const ci    = block.querySelector('.s-color-input');
+  if (sel.value === 'custom') {
+    ci.click();
+  } else {
+    ci.value = sel.value;
+    refreshBlockColor(block);
+  }
+}
+function refreshBlockColor(block) {
+  const color = block.querySelector('.s-color-input').value;
+  block.querySelector('.section-block-header').style.borderLeftColor = color;
+  block.querySelector('.btn-add-part').style.color = color;
+}
+
+/* ---- 部品行追加/削除 ---- */
+function addPart(btn) {
+  const tbody = btn.closest('.section-block').querySelector('.parts-body');
+  tbody.appendChild(document.getElementById('tpl-part').content.cloneNode(true));
+}
+function removePart(btn) { btn.closest('tr').remove(); }
+
+/* ---- フォーム送信 ---- */
+async function submitForm() {
+  hideError();
+
+  // バリデーション
+  const maker = v('f-maker'), model = v('f-model'), year = v('f-year');
+  const displacement = parseInt(document.getElementById('f-displacement').value, 10);
+  if (!maker || !model || !year || !displacement) {
+    showError('メーカー・車種名・年式・排気量は必須です。');
+    return;
+  }
+
+  // セクション収集
+  const sections = [];
+  document.querySelectorAll('.section-block').forEach((block, idx) => {
+    const name  = block.querySelector('.s-name').value.trim();
+    const color = block.querySelector('.s-color-input').value;
+    if (!name) return;  // 名前なしは無視
+
+    const sid = name.toLowerCase()
+      .replace(/[^\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF\uFF00-\uFFEFa-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '') || ('section-' + idx);
+
+    const parts = [];
+    block.querySelectorAll('.part-row').forEach(row => {
+      const pname = row.querySelector('.p-name').value.trim();
+      if (!pname) return;
+      parts.push({
+        name:   pname,
+        spec:   row.querySelector('.p-spec').value.trim(),
+        torque: row.querySelector('.p-torque').value.trim() || '—',
+        unit:   row.querySelector('.p-unit').value,
+        note:   row.querySelector('.p-note').value.trim(),
+      });
+    });
+    sections.push({ id: sid, name, color, parts });
+  });
+
+  // データ組み立て
+  const data = {
+    id: genId(),
+    maker, model, year, displacement,
+    displacement_label: displacement + 'cc',
+    tire_pressure: {
+      front: v('f-tire-front'),
+      rear:  v('f-tire-rear'),
+      unit:  v('f-tire-unit') || 'bar',
+      note:  v('f-tire-note'),
+    },
+    oil: {
+      type:                    v('f-oil-type'),
+      capacity_with_filter:    v('f-oil-cap-f'),
+      capacity_without_filter: v('f-oil-cap-n'),
+      note:                    v('f-oil-note'),
+    },
+    brake_fluid: v('f-brake'),
+    spark_plug:  v('f-plug'),
+    obd2_note:   v('f-obd2'),
+    sections,
+  };
+
+  if (data.id === '—') { showError('メーカー・車種名・年式を入力してください。'); return; }
+
+  // 送信
+  try {
+    const res  = await fetch('/admin/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    const json = await res.json();
+    if (!res.ok) { showError(json.error || '保存に失敗しました。'); return; }
+    window.location.href = '/spec/' + json.id;
+  } catch (e) {
+    showError('通信エラー: ' + e.message);
+  }
+}
+
+function showError(msg) {
+  const el = document.getElementById('form-error');
+  el.textContent = '⚠️ ' + msg;
+  el.style.display = '';
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+function hideError() {
+  document.getElementById('form-error').style.display = 'none';
+}
+</script>
+{% endblock %}
